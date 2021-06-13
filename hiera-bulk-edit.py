@@ -6,6 +6,13 @@ import braceexpand
 from braceexpand import braceexpand
 from compiler.ast import flatten
 
+yaml = ruamel.yaml.YAML()
+yaml.explicit_start = True
+yaml.allow_duplicate_keys = True
+yaml.preserve_quotes = True
+yaml.width=1024
+yaml.indent(mapping=2, sequence=4, offset=2)
+
 def usage():
     print 'Hiera Bulk Edit.  Programmatically update human-edited Hiera YAML files.'
     print ''
@@ -53,7 +60,7 @@ def check_paths(paths):
                     usage()
 
 def yaml_files(paths):
-    expanded = flatten([glob2.glob(p + '/**/*.yaml') for p in list(braceexpand(paths))])
+    expanded = flatten([glob2.glob(p + '/**/*.yml') for p in list(braceexpand(paths))])
     return expanded
 
 def code_file_data(f):
@@ -63,18 +70,21 @@ def code_file_data(f):
 
 def read_file(f):
     with open(f, 'r') as _f:
-        return ruamel.yaml.round_trip_load(
-            _f.read(),
-            preserve_quotes=True)
+        return yaml.load(_f)
+        # return ruamel.yaml.round_trip_load(
+        #     _f.read(),
+        #     preserve_quotes=True)
 
 def write_file(f, data):
     with open(f, 'w') as _f:
-        ruamel.yaml.dump(
-            data,
-            stream=_f,
-            Dumper=ruamel.yaml.RoundTripDumper,
-            explicit_start=True,
-            width=1024)
+        yaml.dump(data, _f)
+    # with open(f, 'w') as _f:
+    #     ruamel.yaml.dump(
+    #         data,
+    #         stream=_f,
+    #         Dumper=ruamel.yaml.RoundTripDumper,
+    #         explicit_start=True,
+    #         width=1024)
 
 # main
 
